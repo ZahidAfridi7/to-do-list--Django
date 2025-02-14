@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-do List</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Add a New Task</h2>
+        <form method="POST" action="{% url 'add_task' %}">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="Enter task title" required>
+            <input type="datetime-local" name="due_date" required>
+            <button type="submit">Add Task</button>
+        </form>
+    
+        <table>
+            <tr>
+                <th>Task</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for task in tasks %}
+            <tr>
+                <td>
+                    {{ task.title }} <br>
+                    {% if task.due_date %}
+                    <small>Due: {{ task.due_date|date:"Y-m-d H:i" }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="GET" action="{% url 'edit_task' task.id %}" style = "display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="edit">Edit task</button>
+                    </form>    
+                    {% if task.completed %}
+                        <span style="color: green;">Completed</span>
+                    {% else %}
+                        <span style="color: red;">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not task.completed %}
+                    <form method="POST" action="{% url 'mark_completed' task.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Complete</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="delete">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No tasks available</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
